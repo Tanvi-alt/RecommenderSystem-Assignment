@@ -1,12 +1,12 @@
 import streamlit as st
-from recommender import recommend_movies, movies
+from recommender import recommend_movies, recommend_by_genre, movies
 
 # ==========================================
 # PAGE CONFIG
 # ==========================================
 
 st.set_page_config(
-    page_title="Movie Recommender",
+    page_title="Advanced Movie Recommender",
     page_icon="🎬",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -19,48 +19,90 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-.main {
-    background-color: #0E1117;
+/* Main Background */
+.stApp {
+    background: linear-gradient(to right, #0f0f0f, #141414);
     color: white;
 }
 
-.stButton>button {
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background-color: #111827;
+}
+
+/* Title */
+.main-title {
+    text-align: center;
+    font-size: 55px;
+    font-weight: bold;
+    color: #E50914;
+    margin-bottom: 0;
+}
+
+.subtitle {
+    text-align: center;
+    color: #b3b3b3;
+    font-size: 20px;
+    margin-top: 0;
+}
+
+/* Buttons */
+.stButton > button {
     width: 100%;
-    background-color: #E50914;
+    background: linear-gradient(90deg, #E50914, #ff3c4d);
     color: white;
-    border-radius: 10px;
-    height: 3em;
+    border-radius: 12px;
+    height: 3.2em;
     font-size: 18px;
     font-weight: bold;
     border: none;
+    transition: 0.3s;
 }
 
-.stButton>button:hover {
-    background-color: #ff1e2d;
-    color: white;
+.stButton > button:hover {
+    transform: scale(1.03);
+    background: linear-gradient(90deg, #ff3c4d, #E50914);
 }
 
+/* Movie Cards */
 .movie-card {
-    background-color: #1c1f26;
+    background: linear-gradient(145deg, #1e1e1e, #252525);
     padding: 20px;
-    border-radius: 15px;
-    margin-bottom: 15px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.4);
     transition: 0.3s;
 }
 
 .movie-card:hover {
-    transform: scale(1.02);
-    background-color: #262730;
+    transform: translateY(-5px);
+    box-shadow: 0px 8px 20px rgba(229,9,20,0.3);
 }
 
-.big-font {
-    font-size: 22px !important;
+.movie-title {
+    font-size: 24px;
     font-weight: bold;
-    color: #ffffff;
+    color: white;
 }
 
-.small-font {
-    color: #b3b3b3;
+.movie-desc {
+    color: #c7c7c7;
+    margin-top: 8px;
+}
+
+/* Recommendation Section */
+.section-title {
+    color: #E50914;
+    font-size: 30px;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    color: gray;
+    padding: 20px;
 }
 
 </style>
@@ -72,96 +114,165 @@ st.markdown("""
 
 with st.sidebar:
 
-    st.title("🎥 About")
+    st.image(
+        "https://cdn-icons-png.flaticon.com/512/3418/3418886.png",
+        width=120
+    )
+
+    st.title("🎥 Movie Recommender")
 
     st.write("""
-    This Movie Recommendation System suggests movies 
-    similar to your selected movie using Machine Learning.
+    Discover movies based on:
+    
+    ✅ Similar Movies  
+    ✅ Genre Selection  
+    ✅ Smart ML Recommendations  
+    ✅ Beautiful UI Experience
     """)
 
     st.markdown("---")
 
-    st.subheader("⚡ Features")
-
-    st.write("""
-    ✅ Smart Recommendations  
-    ✅ Fast Search  
-    ✅ Modern UI  
-    ✅ Interactive Layout  
-    """)
+    recommendation_type = st.radio(
+        "Choose Recommendation Mode",
+        [
+            "🎬 Similar Movies",
+            "🎭 Genre Based"
+        ]
+    )
 
     st.markdown("---")
 
-    st.info("Built using Streamlit + ML")
+    st.info("Powered by Streamlit + Machine Learning")
 
 # ==========================================
 # HEADER
 # ==========================================
 
 st.markdown("""
-<h1 style='text-align: center; color: #E50914;'>
-🎬 Movie Recommendation System
+<h1 class='main-title'>
+🎬 CineMatch AI
 </h1>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<p style='text-align: center; font-size:18px;'>
-Discover movies you'll love instantly 🍿
+<p class='subtitle'>
+Find your next favorite movie instantly 🍿
 </p>
 """, unsafe_allow_html=True)
 
 st.markdown("---")
 
 # ==========================================
-# SEARCH SECTION
+# SIMILAR MOVIE MODE
 # ==========================================
 
-movie_list = movies['title'].values
+if recommendation_type == "🎬 Similar Movies":
 
-col1, col2 = st.columns([4, 1])
-
-with col1:
-
-    selected_movie = st.selectbox(
-        "🔍 Search or Select a Movie",
-        movie_list
+    st.markdown(
+        "<p class='section-title'>🔍 Search Similar Movies</p>",
+        unsafe_allow_html=True
     )
 
-with col2:
+    movie_list = movies['title'].values
 
-    st.write("")
-    st.write("")
+    col1, col2 = st.columns([4, 1])
 
-    recommend_btn = st.button("Recommend")
+    with col1:
+
+        selected_movie = st.selectbox(
+            "Choose a movie",
+            movie_list
+        )
+
+    with col2:
+
+        st.write("")
+        st.write("")
+
+        recommend_btn = st.button("Recommend")
+
+    if recommend_btn:
+
+        with st.spinner("Finding best recommendations... 🍿"):
+
+            recommendations = recommend_movies(selected_movie)
+
+        st.success(f"Recommendations based on '{selected_movie}'")
+
+        st.markdown(
+            "<p class='section-title'>🎯 Recommended Movies</p>",
+            unsafe_allow_html=True
+        )
+
+        cols = st.columns(3)
+
+        for idx, movie in enumerate(recommendations):
+
+            with cols[idx % 3]:
+
+                st.markdown(f"""
+                <div class="movie-card">
+                    <div class="movie-title">🎬 {movie}</div>
+                    <div class="movie-desc">
+                        Perfect match based on your selected movie.
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
 # ==========================================
-# RECOMMENDATION SECTION
+# GENRE MODE
 # ==========================================
 
-if recommend_btn:
+else:
 
-    with st.spinner("Finding best recommendations for you... 🍿"):
+    st.markdown(
+        "<p class='section-title'>🎭 Genre Based Recommendations</p>",
+        unsafe_allow_html=True
+    )
 
-        recommendations = recommend_movies(selected_movie)
+    genres = [
+        "Action",
+        "Comedy",
+        "Drama",
+        "Romance",
+        "Thriller",
+        "Horror",
+        "Sci-Fi",
+        "Adventure",
+        "Animation"
+    ]
 
-    st.success(f"Top recommendations based on '{selected_movie}'")
+    selected_genre = st.selectbox(
+        "Select Genre",
+        genres
+    )
 
-    st.markdown("## 🎯 Recommended Movies")
+    genre_btn = st.button("Find Movies")
 
-    cols = st.columns(3)
+    if genre_btn:
 
-    for idx, movie in enumerate(recommendations):
+        with st.spinner("Fetching top movies for you... 🍿"):
 
-        with cols[idx % 3]:
+            genre_movies = recommend_by_genre(selected_genre)
 
-            st.markdown(f"""
-            <div class="movie-card">
-                <p class="big-font">🎬 {movie}</p>
-                <p class="small-font">
-                    Similar taste match for you
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
+        st.success(f"Top {selected_genre} Movies")
+
+        st.markdown(
+            "<p class='section-title'>🔥 Popular Picks</p>",
+            unsafe_allow_html=True
+        )
+
+        cols = st.columns(3)
+
+        for idx, movie in enumerate(genre_movies):
+
+            with cols[idx % 3]:
+
+                st.markdown(f"""
+                <div class="movie-card">
+                    <div class="movie-title">🎥 {movie}</div>
+                    <div class="movie-desc">
+                        Trending in {selected_genre}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
 # ==========================================
 # FOOTER
@@ -170,7 +281,7 @@ if recommend_btn:
 st.markdown("---")
 
 st.markdown("""
-<p style='text-align: center; color: gray;'>
+<div class="footer">
 Made with ❤️ using Streamlit
-</p>
+</div>
 """, unsafe_allow_html=True)
