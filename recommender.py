@@ -84,3 +84,12 @@ def recommend_movies(title):
     ]['title'].tolist()
 
     return recommendations
+
+
+def recommend_by_genre(genre):
+
+    filtered_movies = movies[
+        movies['genres'].str.contains(genre, case=False, na=False)
+    ]
+
+    return filtered_movies['title'].head(9).values
