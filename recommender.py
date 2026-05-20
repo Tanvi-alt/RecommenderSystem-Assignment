@@ -3,6 +3,7 @@ import os
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import pickle
 
 # ==========================================
 # LOAD MOVIES DATA
@@ -30,21 +31,15 @@ movies['genres'] = movies['genres'].fillna('')
 # TF-IDF VECTORIZATION
 # ==========================================
 
-tfidf = TfidfVectorizer(
-    stop_words='english'
-)
-
-tfidf_matrix = tfidf.fit_transform(
-    movies['genres']
-)
-
-# ==========================================
-# COSINE SIMILARITY
-# ==========================================
-
-cosine_sim = cosine_similarity(
-    tfidf_matrix,
-    tfidf_matrix
+cosine_sim = pickle.load(
+    open(
+        os.path.join(
+            BASE_DIR,
+            "models",
+            "similarity.pkl"
+        ),
+        "rb"
+    )
 )
 
 # ==========================================
