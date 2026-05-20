@@ -3,7 +3,6 @@ import os
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import pickle
 
 # ==========================================
 # LOAD MOVIES DATA
@@ -31,15 +30,21 @@ movies['genres'] = movies['genres'].fillna('')
 # TF-IDF VECTORIZATION
 # ==========================================
 
-cosine_sim = pickle.load(
-    open(
-        os.path.join(
-            BASE_DIR,
-            "models",
-            "similarity.pkl"
-        ),
-        "rb"
-    )
+tfidf = TfidfVectorizer(
+    stop_words='english'
+)
+
+tfidf_matrix = tfidf.fit_transform(
+    movies['genres']
+)
+
+# ==========================================
+# COSINE SIMILARITY
+# ==========================================
+
+cosine_sim = cosine_similarity(
+    tfidf_matrix,
+    tfidf_matrix
 )
 
 # ==========================================
@@ -86,10 +91,20 @@ def recommend_movies(title):
     return recommendations
 
 
+# ==========================================
+# GENRE RECOMMENDATION
+# ==========================================
+
 def recommend_by_genre(genre):
 
     filtered_movies = movies[
-        movies['genres'].str.contains(genre, case=False, na=False)
+        movies['genres'].str.contains(
+            genre,
+            case=False,
+            na=False
+        )
     ]
 
-    return filtered_movies['title'].head(9).values
+    return filtered_movies[
+        'title'
+    ].head(9).values
